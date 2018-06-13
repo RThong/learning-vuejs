@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>发布订阅实现双向绑定</title>
+</head>
+<body>
+  num: <input type="number" data-bind-num>
+  <div data-bind-num></div>
+  
+  <br>
+  <br>
+  <br>
+  <br>
+  <br>
+
+  age: <input type="number" data-bind-age>
+  <div data-bind-age></div>
+
+  <script src="https://cdn.bootcss.com/jquery/2.2.4/jquery.js"></script>
+  <script>
+    const eventHub = {
+      callbacks: {},
+
+      on(eventName, callback){
+        this.callbacks[eventName] = this.callbacks[eventName] || [];
+        this.callbacks[eventName].push(callback);
+      },
+
+      emit(eventName, ...rest){
+        this.callbacks[eventName] = this.callbacks[eventName] || [];
+        for(let i = 0; i < this.callbacks[eventName].length; i++){
+          this.callbacks[eventName][i].call(this,...rest);
+        }
+      }
+    }
+
+    const Vue = {
+      data: {
+        num: 0,
+        age: 0
+      },
+      //通过set()修改data来触发对应的change事件
+      set(key, val) {
+        this.data[key] = val
+        eventHub.emit(fn(key).eventName, val)
+      }
+    }
+
+
+    const fn = (prop_name) => {     
+      return {
+        dataBind: `data-bind-${prop_name}`,//对应dom的data属性名
+        eventName: `${prop_name}:change`//对应数据的change事件名称
+      }      
+    }
+
+    //给所有data绑定change事件,给所有data对应的view绑定input事件
+    for(let key in Vue.data){
+      //data修改改变view
+      eventHub.on(fn(key).eventName, (val) => {
+
+        $(`input[${fn(key).dataBind}]`).val(val)
+        $(`div[${fn(key).dataBind}]`).text(val)
+
+      })
+
+      //view改变data
+      $(`input[${fn(key).dataBind}]`).on('input', function() {
+
+        let val = $(this).val() === '' ? 0 : parseInt($(this).val())
+        Vue.set(key, val)
+
+      })
+    }
+
+  </script>
+</body>
+</html>
