@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>发布订阅实现双向绑定</title>
+  <title>简单双向绑定</title>
 </head>
 <body>
   num: <input type="number" data-bind-num>
@@ -19,7 +19,7 @@
 
   <script src="https://cdn.bootcss.com/jquery/2.2.4/jquery.js"></script>
   <script>
-    const eventHub = {
+    const EventHub = {
       callbacks: {},
 
       on(eventName, callback){
@@ -35,16 +35,42 @@
       }
     }
 
+    const Observer = {
+      mapProp(obj) {
+        if(!obj || typeof obj !== 'object') {
+          return
+        }
+        Object.keys(obj).map((key) => {
+          this.defineReactive(obj, key, obj[key])
+        })
+      },
+      defineReactive(obj, key, val) {
+        this.mapProp(val)
+        Object.defineProperty(obj, key, {
+          enumerable: true, // 可枚举
+          configurable: false, // 不能再define
+          get() {
+            return val
+          },
+          set(newVal) {
+            console.log(`数据 ${key} 从${val}->${newVal}`)
+            EventHub.emit(fn(key).eventName, newVal)
+            val = newVal
+          }
+        })
+      }
+    }
+
     const Vue = {
       data: {
         num: 0,
         age: 0
       },
       //通过set()修改data来触发对应的change事件
-      set(key, val) {
-        this.data[key] = val
-        eventHub.emit(fn(key).eventName, val)
-      }
+      // set(key, val) {
+      //   this.data[key] = val
+      //   EventHub.emit(fn(key).eventName, val)
+      // }
     }
 
 
@@ -55,25 +81,29 @@
       }      
     }
 
+    //监听所有data
+    Observer.mapProp(Vue.data)
+
     //给所有data绑定change事件,给所有data对应的view绑定input事件
-    for(let key in Vue.data){
+    Object.keys(Vue.data).map((key) => {
+
       //data修改改变view
-      eventHub.on(fn(key).eventName, (val) => {
+      EventHub.on(fn(key).eventName, (val) => {
 
         $(`input[${fn(key).dataBind}]`).val(val)
         $(`div[${fn(key).dataBind}]`).text(val)
 
       })
+      //初始化一下数据
+      Vue.data[key] = Vue.data[key]
 
       //view改变data
       $(`input[${fn(key).dataBind}]`).on('input', function() {
 
-        let val = $(this).val() === '' ? 0 : parseInt($(this).val())
-        Vue.set(key, val)
-
+        let val = $(this).val() === '' ? '' : parseInt($(this).val())
+        Vue.data[key] = $(this).val()
       })
-    }
-
+    })    
   </script>
 </body>
 </html>
