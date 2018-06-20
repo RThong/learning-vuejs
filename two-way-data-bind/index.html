@@ -50,6 +50,7 @@
           enumerable: true, // 可枚举
           configurable: false, // 不能再define
           get() {
+            console.log(key+'触发get')
             return val
           },
           set(newVal) {
@@ -90,8 +91,8 @@
       //data修改改变view
       EventHub.on(fn(key).eventName, (val) => {
 
-        $(`input[${fn(key).dataBind}]`).val(val)
-        $(`div[${fn(key).dataBind}]`).text(val)
+        $(`[${fn(key).dataBind}]`).val(val)
+        $(`[${fn(key).dataBind}]`).text(val)
 
       })
       //初始化一下数据
