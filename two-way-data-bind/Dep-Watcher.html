@@ -8,16 +8,15 @@
   <div id="app">
     <input type="text" v-model="text">
     {{text}}
-    <br>
+    <!-- <br>
     <input type="text" v-model="age">
-    {{age}}
+    {{age}} -->
   </div>
   <script>
     //
 
     //每个data都有一个dep  存入watcher
     function Dep() {
-      // console.dir(this)
       this.subs = []
     }
     Dep.prototype= {
@@ -37,18 +36,18 @@
     //name: 使用到的data的key
     //type: 分不同的类型进行渲染
     function Watcher(node, vm, name, type) {
-      // console.dir(this)
+      Dep.target = this//控制只在compile获取到的位置才push到Dep
       this.node = node
       this.vm = vm
       this.name = name
       this.type = type  
-      this.render()     
+      this.render() //为了初始化渲染视图
+      Dep.target = null//在修改data时会把值保存在this.value,触发data的get但是不能push watcher
     }
 
     Watcher.prototype = {
-      render() { 
-        console.dir(this)
-        this.get()      
+      render() {
+        this.get() 
         if(this.type === 'input'){
           this.node.value = this.value
         }
@@ -56,11 +55,9 @@
           this.node.nodeValue = this.value
         }
       },
-      //this.vm[this.name]将触发data get()将watcher push到依赖中，this.value保存最新值
-      get() {  
-        Dep.target = this     
-        this.value = this.vm[this.name]
-        Dep.target = null     
+      //在watcher中保存最新的值,所有视图更新都是按照this.value
+      get() {
+        this.value = this.vm[this.name]       
       }
     }
 
@@ -76,6 +73,7 @@
         get: function () {
           if(Dep.target){
             dep.addSub(Dep.target)
+            console.log(dep)
           }                
           return val
         },
