@@ -8,6 +8,8 @@
   <div id="app">
     <input type="text" v-model="text">
     {{text}}
+    <br>
+    {{arr}}
     <!-- <br>
     <input type="text" v-model="age">
     {{age}} -->
@@ -52,6 +54,7 @@
           this.node.value = this.value
         }
         else if(this.type === 'text'){
+          console.log(this.value)
           this.node.nodeValue = this.value
         }
       },
@@ -59,6 +62,26 @@
       get() {
         this.value = this.vm[this.name]       
       }
+    }
+
+    //劫持数组操作
+    function observifyArray(array, dep){
+      var methods = ['push', 'pop', 'shift', 'unshift', 'splice', 'sort', 'reverse'];
+
+      //新建对象指向Array原型  为了能够访问除去以上的数组属性
+      var arrayProto = Object.create(Array.prototype);
+      methods.map(function(method){
+        arrayProto[method] = function(...args){
+          // 劫持修改数据
+          var ret = Array.prototype[method].apply(this, args);
+          //可以在修改数据时触发其他的操作
+          console.log("newValue: ", this);
+          dep.notify()
+          return ret;
+        }      
+      })
+      //将数组原型指向新建的对象   让数组能够访问自定义的数组操作方法
+      array.__proto__ = arrayProto
     }
 
     function observe(obj) {
@@ -69,6 +92,10 @@
 
     function defineReactive(obj, key, val) {
       const dep = new Dep()
+      if(isArray(val)){
+        observifyArray(val, dep)
+      }
+      
       Object.defineProperty(obj, key, {
         get: function () {
           if(Dep.target){
@@ -128,14 +155,19 @@
       }
     }
 
-
-
+    function isArray(arg) {
+      if (typeof arg === 'object') {
+        return Object.prototype.toString.call(arg) === '[object Array]';
+      }
+      return false;
+    }
 
     const vm = {
       data: {
         text: 1,
         age: 22,
-        num: 3
+        num: 3,
+        arr: [1,2,3]
       }
     }
 
