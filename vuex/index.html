@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>vuex</title>
+	<script src="https://cdn.bootcss.com/vue/2.5.16/vue.js"></script>
+	<script src="https://cdn.bootcss.com/vuex/3.0.1/vuex.js"></script>
+</head>
+<body>
+	<div id="app"></div>
+	<!-- <script>
+		Vue.use(Vuex)
+
+		const store = new Vuex.Store({
+			state: {
+				name: 'hong',
+				test: 0
+			},
+			mutations: {
+				setName(state, newName) {
+					if(state.name === newName) {
+						return
+					}
+					console.log(`我修改了${state.name} ===> ${newName}`)
+					state.name = newName
+				},
+				setTest(state, newTest) {
+					state.test = newTest
+				}
+			},
+			actions: {
+				setTest({commit}) {
+					setTimeout(() => {
+						console.log('!!!!!')
+						commit('setTest', 100)
+					}, 3000)
+				}
+			}
+		})
+
+		const eventHub = new Vue({
+			data: {
+				age: 18
+			}
+		})
+		eventHub.$on('age', function(){
+			this.age++
+		})
+
+		Vue.component('component-a', {
+			// props: ['name'],
+			template: `
+				<div>
+					<button @click="changeName">click me to wu</button>
+					<button @click="changeAge">click me to change age</button>
+					<button @click="changeTest">click me to change test</button>
+					<span>{{name}}</span>
+					<span>{{age}}</span>
+					<span>test: {{test}}</span>
+				</div>
+			`,
+			data() {
+				return {
+					// name: ''
+				}
+			},
+			computed: {
+				// name() {
+				// 	return this.$store.state.name
+				// },
+				age() {
+					return eventHub.age
+				},
+				...Vuex.mapState(['name', 'test'])
+			},
+			methods: {
+				changeName() {
+					this.$store.commit('setName', 'wu')
+				},
+				...Vuex.mapActions({
+					changeTest: 'setTest'
+				}),
+				// changeTest() {
+				// 	this.$store.dispatch('setTest')
+				// },
+				changeAge() {
+					eventHub.$emit('age')
+				}
+			}
+			// mounted() {
+			// 	this.name = 'wu'
+			// }
+		})
+
+		Vue.component('component-b', {
+			// props: ['name'],
+			template: `
+				<div>
+					<button @click="changeName">click me to wang</button>
+					<button @click="changeAge">click me to change age</button>
+					<span>{{name}}</span>
+					<span>{{age}}</span>
+				</div>
+			`,
+			data() {
+				return {
+					// name: ''
+				}
+			},
+			computed: {
+				name() {
+					return this.$store.state.name
+				},
+				age() {
+					return eventHub.age
+				}
+			},
+			methods: {
+				changeName() {
+					this.$store.commit('setName', 'wang')
+				},
+				changeAge() {
+					eventHub.$emit('age')
+				}
+			}
+		})
+
+		const vm = new Vue({
+			el: '#app',
+			store,
+			data: {
+				name: 'hong'
+			},
+			template: `
+				<div>
+					<component-a></component-a>
+					<hr />
+					<component-b></component-b>
+				</div>
+			`,
+		})
+	</script> -->
+	<script>
+		Vue.use(Vuex)
+
+		Vue.component('component-a', {
+			template: `
+				<div>
+					<button @click="changeName">click me to wu</button>
+					<button @click="changeAge">click me to change age</button>
+					<button @click="changeTest">click me to change test</button>
+					<span>{{name}}</span>
+					<span>{{age}}</span>
+					<span>test: {{test}}</span>
+				</div>
+			`,
+			computed: {
+				name() {
+					return this.$store.state.name
+				},
+				age() {
+					return this.$store.state.age
+				},
+				test() {
+					return this.$store.state.test
+				}
+			},
+			methods: {
+				changeName() {
+					this.$store.commit('setName', 'hong')
+				},
+				changeAge() {
+					this.$store.commit('setAge')
+				},
+				changeTest() {
+					this.$store.dispatch('setTest')
+				}
+			}
+		})
+
+		Vue.component('component-b', {
+			template: `
+				<div>
+					<button @click="changeName">click me to wu</button>
+					<button @click="changeAge">click me to change age</button>
+					<button @click="changeTest">click me to change test</button>
+					<span>{{name}}</span>
+					<span>{{age}}</span>
+					<span>test: {{test}}</span>
+				</div>
+			`,
+			computed: {
+				...Vuex.mapState(['name', 'age', 'test'])
+				// name() {
+				// 	return this.$store.state.name
+				// },
+				// age() {
+				// 	return this.$store.state.age
+				// },
+				// test() {
+				// 	return this.$store.state.test
+				// }
+			},
+			methods: {
+				...Vuex.mapMutations({
+					changeName: 'setName',
+					changeAge: 'setAge'
+				}),
+				// changeName() {
+				// 	this.$store.commit('setName', 'hong')
+				// },
+				// changeAge() {
+				// 	this.$store.commit('setAge')
+				// },
+				...Vuex.mapActions({
+					changeTest: 'setTest'
+				})
+				// changeTest() {
+				// 	this.$store.dispatch('setTest')
+				// }
+			}
+		})
+
+		const store = new Vuex.Store({
+			state: {
+				name: '',
+				age: '',
+				test: ''
+			},
+			mutations: {
+				setName(state, name) {
+					state.name = name
+				},
+				setAge(state) {
+					state.age++
+				},
+				setTest(state) {
+					state.test++
+				}
+			},
+			actions: {
+				setTest({commit}) {
+					setTimeout(() => commit('setTest'), 1000)
+				}
+			}
+		})
+
+		const vm = new Vue({
+			el: '#app',
+			template: `
+				<div>
+					<component-a></component-a>
+					<component-b></component-b>
+				</div>
+			`,
+			store
+		})
+
+		console.dir(vm.$el)
+	</script>
+</body>
+</html>

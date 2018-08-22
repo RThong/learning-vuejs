@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>Document</title>
+
+</head>
+<body>
+	<div id="app"></div>
+	<script src="https://cdn.bootcss.com/vue/2.5.16/vue.js"></script>
+	<script>
+		const vm = new Vue({
+			el: '#app',
+			template: '<div>{{text}}</div>',
+			data: {
+				text: 0
+			},
+			beforeCreate() {
+				console.log(`-------------beforeCreate`)
+				console.log('$el    ', this.$el)
+				console.log('$data    ', this.$data)
+				console.log('text    ', this.text)
+			},
+			created() {
+				console.log(`-------------created`)
+				console.log('$el    ', this.$el)
+				console.log('$data    ', this.$data)
+				console.log('text    ', this.text)
+			},
+			beforeMount() {
+				console.log(`-------------beforeMount`)
+				console.log('$el    ', this.$el)
+				console.log('$data    ', this.$data)
+				console.log('text    ', this.text)
+			},
+			mounted() {
+				console.log(`-------------mounted`)
+				console.log('$el    ', this.$el)
+				console.log('$data    ', this.$data)
+				console.log('text    ', this.text)
+			},
+			beforeUpdate() {
+				console.log(`-------------beforeUpdate`)
+				console.log(this)
+			},
+			updated() {
+				console.log(`-------------updated`)
+				console.log(this)
+			},
+			activted() {
+				console.log(`-------------activted`)
+				console.log(this)
+			},
+			deactivted() {
+				console.log(`-------------deactivted`)
+				console.log(this)
+			},
+			beforeDestroy() {
+				console.log(`-------------beforeDestroy`)
+				console.log(this)
+			},
+			destroyed() {
+				console.log(`-------------destroyed`)
+				console.log(this)
+			},
+		})
+
+	</script>
+</body>
+</html>

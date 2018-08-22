@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>响应式数据</title>
+</head>
+<body>
+	<div id="app"></div>
+	<script>
+		//因为render函数在使用到data对象的数据时会调用get，就可以收集到view对应的数据依赖，并在get中订阅一个回调来生成新的
+		//vdom
+		function Dep() {
+			Dep.target = this
+			this.event = undefined
+		}
+
+		Dep.prototype = {
+			emit(cb) {
+				this.event = cb
+			},
+			on() {
+				this.event && this.event()
+			}
+		}
+		
+		Dep.target = null//确认是否是渲染依赖时调用的get，可能是手动调用get(这种方式不是视图依赖)
+		
+
+		function Vue(options) {
+			let self = this
+			this.$options = options
+			this.$data = options.data
+			this.vnode = undefined
+
+			observer(this.$data, this._update.bind(self, _vnode)) //数据响应化
+
+			this._update(_vnode)//更新vnode
+
+			function defineReactive(key, val, cb) {
+				//每个数据都实例化一个Dep来收集依赖
+				const dep = new Dep()
+				Object.defineProperty(self, key, {//将data代理到vue实例上
+					configurable: true,
+					enumerable: true,
+					get() {
+						console.log('get')
+						if(Dep.target) {
+							// 这里订阅事件
+							dep.emit(cb)						
+						}					
+						return val
+					},
+					set(newVal) {
+						console.log('set')
+						if(val === newVal) {
+							return
+						}
+						val = newVal
+						// 触发事件
+						dep.on()
+					}
+				})
+			}
+
+			//为所有data属性添加get/set使其响应化
+			function observer(obj, cb) {
+				Object.keys(obj).map(key => defineReactive(key, obj[key], cb))
+			}
+
+			//生成vnode节点，这是最简单的情况，可能data里面有很多属性和指令
+			function _vnode(tag, data, children) {
+				// if(typeof children === 'string') {
+					return { tag, data, children }
+				// }
+				// else if(Object.prototype.toString.call(children) === '[object Array]') {
+				// 	return {
+				// 		tag,
+				// 		data,
+				// 		children
+				// 	}
+				// }
+			}
+		}
+		
+		Vue.prototype = {
+			_update(_vnode) {
+				Dep.target = 1//表示现在是渲染，调用都get的都是依赖
+				this.vnode = this.$options.render.call(this, _vnode)
+				console.log(this.vnode)
+				Dep.target = null//渲染结束，之后调用的都是手动调用的get，不会进行收集
+				return this.vnode
+			}
+		}
+		
+		const vm = new Vue({
+			el: '#app',
+			data: {
+				text: 1,
+				number: 2
+			},
+			render(h) {
+				return h('div', {}, [
+					h('span', {}, this.text),
+					h('span', {}, this.text),
+					// h('span', {}, this.number)
+					])
+			}
+		})
+	</script>
+</body>
+</html>
