@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+  <meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+  <title>Document</title>
+</head>
+<body>
+  <div id="app"></div>
+  <script src="https://cdn.bootcss.com/vue/2.5.16/vue.min.js"></script>
+  <script>
+    //mixin:为了让多个组件复用一些对象，比如：多个组件都需要使用{ methods:{getData(){/******/}} }
+
+//extend:为了扩展组件功能,比如：需要一个base组件，然后在base组件基础上拓展形成不同功能的组件，有些像继承。
+//       或者是引入全局组件，通过方法调用，比如：this.$toast(/*  不同文本  */)
+
+//component:为了将定义好的组件对象进行注册，第二个参数是extend的示例，Vue.component('a',Vue.extend()),
+//          第二个参数传对象会自动调用extend()传入组件实例
+
+//Vue.mixin()和Vue.extend()有相同键时的，选组件的，生命周期方法则形成一个数组，
+//        混入对象的钩子将在组件自身钩子之前调用
+    const mixin = {
+      methods: {
+        minxinFn() {
+          console.log('我是minxin');
+        }
+      },
+      mounted() {
+        this.minxinFn()
+      }
+    }
+
+    const constructor = Vue.extend({
+      mixins: [mixin],
+      template: `
+        <div>我是extend</div>
+      `,
+      mounted() {
+        this.extendFn()
+      },
+      methods: {
+        extendFn() {
+          console.log('我是extend');
+        }
+      }
+    })
+
+
+    Vue.component('test', constructor)
+
+    new Vue({
+      el: '#app',
+      template: `
+        <test></test>
+      `
+    })
+  </script>
+</body>
+</html>
